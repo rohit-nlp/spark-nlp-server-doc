@@ -7,167 +7,112 @@ info:
   # It can be any string but it is better to use semantic versioning: http://semver.org/
   # Warning: OpenAPI require version to be string, but without quotation YAML can recognize it as number.
   
-  title: Example.com # Replace with your API title
+  title: Spark NLP server # Replace with your API title
   # Keep it simple. Don't add "API" or version at the end of the string.
 
-  termsOfService: 'https://example.com/terms/' # [Optional] Replace with an URL to your ToS
+  termsOfService: 'https://www.johnsnowlabs.com/terms-of-service' # [Optional] Replace with an URL to your ToS
   contact:
-    email: contact@example.com # [Optional] Replace with your contact email
-    url: 'http://example.com/contact' # [Optional] Replace with link to your contact form
+    email: info@johnsnowlabs.com # [Optional] Replace with your contact email
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
   x-logo:
-    url: 'https://apis.guru/openapi-template/logo.png'
+    url: 'https://nlp.johnsnowlabs.com/assets/images/logo.png'
   
   # Describe your API here, you can use GFM (https://guides.github.com/features/mastering-markdown) here
   description: |
-    This is an **example** API to demonstrate features of OpenAPI specification
+    This is the list or REST API end points available to interact with Spark NLP server.
     # Introduction
-    This specification is intended to to be a good starting point for describing your API in 
-    [OpenAPI/Swagger format](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md).
-    It also demonstrates features of [generator-openapi-repo](https://github.com/Rebilly/generator-openapi-repo) tool and 
-    [ReDoc](https://github.com/Rebilly/ReDoc) documentation engine. So beyond the standard OpenAPI syntax we use a few 
-    [vendor extensions](https://github.com/Rebilly/ReDoc/blob/master/docs/redoc-vendor-extensions.md).
-
-    # OpenAPI Specification
-    The goal of The OpenAPI Specification is to define a standard, language-agnostic interface to REST APIs which
-    allows both humans and computers to discover and understand the capabilities of the service without access to source
-    code, documentation, or through network traffic inspection. When properly defined via OpenAPI, a consumer can 
-    understand and interact with the remote service with a minimal amount of implementation logic. Similar to what
-    interfaces have done for lower-level programming, OpenAPI removes the guesswork in calling the service.
+    [Spark NLP](https://nlp.johnsnowlabs.com/)
+    is built on top of Apache Spark 2.4.0 and such is the **only** supported release. it is recommended to have basic knowledge of the Spark framework and a working environment before using Spark NLP. However, the purpose of Spark NLP server is to provide an easy to use API end point to run pre trained ML pipelines on top of Spark NLP without the need to setup any Spark infrastructure.
+    
+      For a list of available pipeline checkout the [link](https://nlp.johnsnowlabs.com/docs/en/pipelines)
 externalDocs:
-  description: Find out how to create Github repo for your OpenAPI spec.
-  url: 'https://github.com/Rebilly/generator-openapi-repo'
+  description: Checkout Spark NLP website.
+  url: 'https://nlp.johnsnowlabs.com'
 
 # A list of tags used by the specification with additional metadata.
 # The order of the tags can be used to reflect on their order by the parsing tools.
 tags:
-  - name: Echo
-    description: Example echo operations
-  - name: User
-    description: Operations about user
+  - name: Pipeline
+    description: List all supported pipeline with example text and a description
+  - name: Run
+    description: Runs a given pipeline 
+  - name: Refresh
+    description: Reloades the in memory pipeline with the latest copy publisehed on S3.
 servers:
-  - url: 'http://example.com/api/v1'
-  - url: 'https://example.com/api/v1'
+  - url: 'http://51.15.249.107:9000'
 
 # Holds the relative paths to the individual endpoints. The path is appended to the
 # basePath in order to construct the full URL. 
 paths:
-  '/users/{username}': # path parameter in curly braces
-
-    # parameters list that are used with each operation for this path
-    parameters:
-      - name: pretty_print
-        in: query
-        description: Pretty print response
-        schema:
-          type: boolean
+  /getPipeline: # path parameter in curly braces
     get: # documentation for GET operation for this path
       tags:
-        - User
+        - Pipeline
       
       # summary is up to 120 symbold but we recommend to be shortest as possible
-      summary: Get user by user name
+      summary: Get list of pipeline
       
       # you can use GFM in operation description too: https://guides.github.com/features/mastering-markdown
       description: |
-        Some description of the operation. 
-        You can use `markdown` here.
+        Provide a json with details of all the pipeline supported on the server along with examples and description of the pipeline.
       
       # operationId should be unique across the whole specification
       operationId: getUserByName
-      
-      # list of parameters for the operation
-      parameters:
-        - name: username
-          in: path
-          description: The name that needs to be fetched
-          required: true
-          schema:
-            type: string
-        - name: with_email
-          in: query
-          description: Filter users without email
-          schema:
-            type: boolean
-      
-      # security schemas applied to this operation
-      security:
-        - main_auth:
-            - 'read:users' # for auth2 provide list of scopes here
-        - api_key: []
       responses: # list of responses
         '200':
           description: Success
           content:
             application/json: # operation response mime type
               schema: # response schema can be specified for each response
-                $ref: '#/components/schemas/User'
-              example: # response example
-                username: user1
-                email: user@example.com
-        '403':
-          description: Forbidden
-        '404':
-          description: User not found
-    # documentation for PUT operation for this path
-    put:
+                $ref: '#/components/schemas/Pipeline'
+        '400':
+          description: The request contains bad syntax or cannot be fulfilled.
+  /refresh/{name}: # path parameter in curly braces
+    get: # documentation for GET operation for this path
       tags:
-        - User
-      summary: Updated user
-      description: This can only be done by the logged in user.
-      operationId: updateUser
+        - Refresh
+      
+      # summary is up to 120 symbold but we recommend to be shortest as possible
+      summary: Reload a pipeline
+      
+      # you can use GFM in operation description too: https://guides.github.com/features/mastering-markdown
+      description: |
+        Reloads the provided pipeline in memory from the latest model in S3.
+      
+      # operationId should be unique across the whole specification
+      operationId: refreshPipeline
       parameters:
-        - name: username
-          in: path
-          description: The name that needs to be updated
+        - in: path
+          name: name
+          description: name of the pipeline
+          example: 'explain_document_dl'
           required: true
           schema:
-            type: string
-      security:
-        - main_auth:
-            - 'write:users'
-      responses:
+            $ref: '#/components/schemas/name' 
+      responses: # list of responses
         '200':
-          description: OK
+          description: Success
+          content:
+            text/plain: # operation response mime type
+              schema: # response schema can be specified for each response
+                type: string
+                example: 'Done'
         '400':
-          description: Invalid user supplied
+          description: The request contains bad syntax or cannot be fulfilled
         '404':
-          description: User not found
-      # request body documentation
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/User'
-        description: Updated user object
-        required: true
-  /echo: # path parameter in curly braces
+          description: The pipeline do not exist
+  /run: # path parameter in curly braces
     post: # documentation for POST operation for this path
       tags:
-        - Echo
-      summary: Echo test
-      description: Receive the exact message you've sent
-      operationId: echo
-      security:
-        - api_key: []
-        - basic_auth: []
+        - Run
+      summary: Run the pipeline
+      description: run the pipeline provided on the given text.
+      operationId: run
       responses:
         '200':
           description: OK
-          # document headers for this response
-          headers:
-            X-Rate-Limit: # Header name
-              description: calls per hour allowed by the user
-              schema: # Header schema
-                type: integer
-                format: int32
-            X-Expires-After:
-              $ref: '#/components/headers/ExpiresAfter'
           content:
             application/json:
               schema:
@@ -185,65 +130,71 @@ paths:
         content:
           application/json:
             schema:
-              type: string
-              example: Hello world!
-          application/xml:
-            schema:
-              type: string
-              example: Hello world!
-        description: Echo payload
+              $ref: '#/components/schemas/runResponse'
+        description: Run the pipeline
         required: true
         
 # An object to hold reusable parts that can be used across the spec
 components:
   schemas:
-    Email:
-      description: User email address
-      type: string
-      format: test
-      example: john.smith@example.com
-    User:
+    runResponse:
       type: object
       properties:
-        username:
-          description: User supplied username
+        pipeline:
+          $ref: '#/components/schemas/name'
+        Language:
+          $ref: '#/components/schemas/lang'
+        FullText:
+          description: example text
           type: string
-          minLength: 4
-          example: John78
-        firstName:
-          description: User first name
+          example: David would love to visit many beautful cities wth you. He lives in an amazing country. He lives in Spain.
+        
+    Pipeline: 
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/name'
+        display_name:
+          description: name of the pipeline
           type: string
-          minLength: 1
-          example: John
-        lastName:
-          description: User last name
+          example: Explain document using Deep Learning
+        lang:
+          $ref: '#/components/schemas/lang'
+        desc:
+          description: Description of the pipeline
           type: string
-          minLength: 1
-          example: Smith
-        email:
-          $ref: '#/components/schemas/Email'
-  headers:
-    ExpiresAfter:
-      description: date in UTC when token expires
-      schema:
-        type: string
-        format: date-time
-  # Security scheme definitions that can be used across the specification.
-  securitySchemes:
-    main_auth: # security definition name (you can name it as you want)
-      # the following options are specific to oauth2 type
-      type: oauth2 # authorization type, one of: oauth2, apiKey, http
-      flows:
-        implicit:
-          authorizationUrl: 'http://example.com/api/oauth/dialog'
-          scopes:
-            'read:users': read users info
-            'write:users': modify or remove users
-    api_key:  # security definition name (you can name it as you want)
-      type: apiKey 
-      # The following options are specific to apiKey type
-      in: header # Where API key will be passed: header or query
-      name: api_key # API key parameter name
-    basic_auth: # security definition name (you can name it as you want)
-      type: http
-      scheme: basic
+          example: This pipeline is an extensive <b>Deep Learning</b> based pipeline to apply multiple NLP stages on the provided text.
+        cat:
+          description: Description of the pipeline
+          type: string
+          example: Document Analysis.
+        annotator:
+          description: List of annotator tag present in response
+          type: array
+          items:
+            type: string
+          example:
+            - tokken
+            - stem
+            - lemma
+            - pos
+            - ner
+            - sentence
+            - checked
+            - entities
+        examples:
+          description: example sample to test the pipeline
+          type: array
+          items:
+            type: string
+          example:
+            - David would love to visit many beautful cities wth you. He lives in an amazing country. He lives in Spain.
+            - The European Union is a political and economc union of 28 member states that are located primarily in Europe.
+    name:
+      description: name of the pipeline
+      type: string
+      example: explain_document_dl
+    lang: 
+      description: language for the ml model
+      type: string
+      example: en
