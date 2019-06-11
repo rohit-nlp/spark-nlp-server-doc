@@ -1,0 +1,242 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Spark NLP server",
+    "termsOfService": "https://www.johnsnowlabs.com/terms-of-service",
+    "contact": {
+      "email": "info@johnsnowlabs.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "x-logo": {
+      "url": "https://nlp.johnsnowlabs.com/assets/images/logo.png"
+    },
+    "description": "This is the list or REST API end points available to interact with Spark NLP server.\n# Introduction\n[Spark NLP](https://nlp.johnsnowlabs.com/)\nis built on top of Apache Spark 2.4.0 and such is the **only** supported release. it is recommended to have basic knowledge of the Spark framework and a working environment before using Spark NLP. However, the purpose of Spark NLP server is to provide an easy to use API end point to run pre trained ML pipelines on top of Spark NLP without the need to setup any Spark infrastructure.\n\n  For a list of available pipeline checkout the [link](https://nlp.johnsnowlabs.com/docs/en/pipelines)\n"
+  },
+  "externalDocs": {
+    "description": "Checkout Spark NLP website.",
+    "url": "https://nlp.johnsnowlabs.com"
+  },
+  "tags": [
+    {
+      "name": "Pipeline",
+      "description": "List all supported pipeline with example text and a description"
+    },
+    {
+      "name": "Run",
+      "description": "Runs a given pipeline"
+    },
+    {
+      "name": "Refresh",
+      "description": "Reloades the in memory pipeline with the latest copy publisehed on S3."
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://51.15.249.107:9000"
+    }
+  ],
+  "paths": {
+    "/getPipeline": {
+      "get": {
+        "tags": [
+          "Pipeline"
+        ],
+        "summary": "Get list of pipeline",
+        "description": "Provide a json with details of all the pipeline supported on the server along with examples and description of the pipeline.\n",
+        "operationId": "getUserByName",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pipeline"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request contains bad syntax or cannot be fulfilled."
+          }
+        }
+      }
+    },
+    "/refresh/{name}": {
+      "get": {
+        "tags": [
+          "Refresh"
+        ],
+        "summary": "Reload a pipeline",
+        "description": "Reloads the provided pipeline in memory from the latest model in S3.\n",
+        "operationId": "refreshPipeline",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "description": "name of the pipeline",
+            "example": "explain_document_dl",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "Done"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request contains bad syntax or cannot be fulfilled"
+          },
+          "404": {
+            "description": "The pipeline do not exist"
+          }
+        }
+      }
+    },
+    "/run": {
+      "post": {
+        "tags": [
+          "Run"
+        ],
+        "summary": "Run the pipeline",
+        "description": "run the pipeline provided on the given text.",
+        "operationId": "run",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "examples": {
+                  "response": {
+                    "value": "Hello world!"
+                  }
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/runResponse"
+              }
+            }
+          },
+          "description": "Run the pipeline",
+          "required": true
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "runResponse": {
+        "type": "object",
+        "properties": {
+          "pipeline": {
+            "$ref": "#/components/schemas/name"
+          },
+          "Language": {
+            "$ref": "#/components/schemas/lang"
+          },
+          "FullText": {
+            "description": "example text",
+            "type": "string",
+            "example": "David would love to visit many beautful cities wth you. He lives in an amazing country. He lives in Spain."
+          }
+        }
+      },
+      "Pipeline": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/name"
+          },
+          "display_name": {
+            "description": "name of the pipeline",
+            "type": "string",
+            "example": "Explain document using Deep Learning"
+          },
+          "lang": {
+            "$ref": "#/components/schemas/lang"
+          },
+          "desc": {
+            "description": "Description of the pipeline",
+            "type": "string",
+            "example": "This pipeline is an extensive <b>Deep Learning</b> based pipeline to apply multiple NLP stages on the provided text."
+          },
+          "cat": {
+            "description": "Description of the pipeline",
+            "type": "string",
+            "example": "Document Analysis."
+          },
+          "annotator": {
+            "description": "List of annotator tag present in response",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "tokken",
+              "stem",
+              "lemma",
+              "pos",
+              "ner",
+              "sentence",
+              "checked",
+              "entities"
+            ]
+          },
+          "examples": {
+            "description": "example sample to test the pipeline",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "David would love to visit many beautful cities wth you. He lives in an amazing country. He lives in Spain.",
+              "The European Union is a political and economc union of 28 member states that are located primarily in Europe."
+            ]
+          }
+        }
+      },
+      "name": {
+        "description": "name of the pipeline",
+        "type": "string",
+        "example": "explain_document_dl"
+      },
+      "lang": {
+        "description": "language for the ml model",
+        "type": "string",
+        "example": "en"
+      }
+    }
+  }
+}

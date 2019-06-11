@@ -1,0 +1,8 @@
+
+apiTitle: Spark-NLP-Server
+splitSpec: false
+codeSamples: true
+swaggerUI: true
+travis: true
+repo: JohnSnowLabs/spark-nlp-server
+oasVersion: 3.0.0
